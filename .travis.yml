@@ -9,14 +9,27 @@ script:
   - docker run -e CI=true kuzza/react-test npm test -- --coverage
 
 after_success:
- - docker build -t kuzza/multi-client ./client
- - docker build -t kuzza/multi-nginx ./nginx
- - docker build -t kuzza/multi-server ./server
- - docker build -t kuzza/multi-worker ./worker
- # log in in docker CLI
- - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
- # take those images and push them to docker hub
- - docker push kuzza/multi-client
- - docker push kuzza/multi-nginx
- - docker push kuzza/multi-server
- - docker push kuzza/multi-worker
+  - docker build -t kuzza/multi-client ./client
+  - docker build -t kuzza/multi-nginx ./nginx
+  - docker build -t kuzza/multi-server ./server
+  - docker build -t kuzza/multi-worker ./worker
+  # log in in docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # take those images and push them to docker hub
+  - docker push kuzza/multi-client
+  - docker push kuzza/multi-nginx
+  - docker push kuzza/multi-server
+  - docker push kuzza/multi-worker
+
+deploy:
+  edge: true
+  provider: elasticbeanstalk
+  region: us-east-2
+  app: multi-docker
+  env: MultiDocker-env
+  bucket_name: elasticbeanstalk-us-east-2-325804762327
+  bucket_path: docker-multi
+  on:
+    branch: master
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: $AWS_SECRET_KEY
